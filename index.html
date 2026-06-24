@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>usBIM Global Strategy Canvas - EN TEAM</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-[#F8F9FA] text-[#333333] font-sans antialiased min-h-screen flex flex-col">
+
+    <header class="bg-white border-b border-gray-200 py-4 px-8 flex justify-between items-center shadow-sm">
+        <div class="flex items-center space-x-3">
+            <div class="w-4 h-8 bg-[#FFDD00]"></div>
+            <h1 class="text-xl font-bold tracking-tight text-gray-900">
+                usBIM Strategy Canvas <span class="text-sm font-normal text-gray-500 ml-2">| EN TEAM Intelligence Portal</span>
+            </h1>
+        </div>
+    </header>
+
+    <main class="flex-grow p-6 max-w-[1800px] w-full mx-auto space-y-6">
+        
+        <section class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+            <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-2">usBIM Ecosystem Adoption Trail Tracker</h3>
+            <div id="trail-container" class="text-sm text-gray-600 flex flex-wrap gap-2 items-center">
+                <span class="text-gray-400 italic">Select any canvas card below to track its operational path.</span>
+            </div>
+        </section>
+
+        <div class="grid grid-cols-3 gap-4">
+            <div id="canvas-container" class="contents">
+                </div>
+        </div>
+    </main>
+
+    <div id="record-modal" class="hidden fixed inset-0 bg-gray-900/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-xl shadow-xl p-6 max-w-md w-full">
+            <h3 id="modal-title" class="font-bold text-lg mb-4">Add Record</h3>
+            <textarea id="item-content" rows="3" class="w-full border p-2 mb-4 rounded"></textarea>
+            <select id="item-parent" class="w-full border p-2 mb-4 rounded">
+                <option value="">-- Standalone Strategy (No Parent) --</option>
+            </select>
+            <div class="flex justify-end space-x-2">
+                <button onclick="closeModal()" class="px-4 py-2 text-gray-500">Cancel</button>
+                <button onclick="saveRecord()" class="px-4 py-2 bg-[#FFDD00] font-bold rounded">Save to Cloud</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_URL = 'PASTE_YOUR_SUPABASE_URL_HERE';
+        const SUPABASE_ANON_KEY = 'PASTE_YOUR_SUPABASE_ANON_KEY_HERE';
+        
+        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        // Define the 9 sections
+        const sections = [
+            "Key Partners", "Key Activities", "Key Resources", 
+            "Value Proposition", "Client Relationship", "Communication Channels", 
+            "Client Segments", "Structural Costs", "Revenue Streams"
+        ];
+
+        // Initialize UI
+        const container = document.getElementById('canvas-container');
+        sections.forEach(sec => {
+            container.innerHTML += `
+                <div class="bg-white border border-gray-200 rounded-lg p-4 shadow-sm flex flex-col">
+                    <h2 class="font-bold text-sm uppercase text-gray-700 mb-2">${sec}</h2>
+                    <div id="section-${sec.replace(/ /g, '-')}" class="flex-grow space-y-2 overflow-y-auto max-h-[200px]"></div>
+                    <button onclick="openModal('${sec}')" class="mt-2 w-full bg-[#FFDD00] text-xs font-bold py-2 rounded">+ Add Record</button>
+                </div>
+            `;
+        });
+
+        async function saveRecord() {
+            const content = document.getElementById('item-content').value;
+            const section = document.getElementById('modal-title').innerText.replace('Add Record to: ', '');
+            const parentId = document.getElementById('item-parent').value;
+
+            const { data, error } = await supabase
+                .from('canvas_entries')
+                .insert([{ id: crypto.randomUUID(), section, content, parent_id: parentId }]);
+
+            if (!error) {
+                closeModal();
+                fetchData(); // Refresh UI
+            }
+        }
+
+        async function fetchData() {
+            const { data } = await supabase.from('canvas_entries').select('*');
+            // Logic to render items in their respective section divs...
+        }
+
+        function openModal(sec) {
+            document.getElementById('modal-title').innerText = `Add Record to: ${sec}`;
+            document.getElementById('record-modal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('record-modal').classList.add('hidden');
+        }
+
+        fetchData();
+    </script>
+</body>
+</html>
