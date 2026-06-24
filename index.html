@@ -3,49 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .acca-yellow { background-color: #FFDD00; }
+        .canvas-box { border: 2px solid #e5e7eb; transition: all 0.2s; }
+        .canvas-box:hover { border-color: #FFDD00; }
+    </style>
 </head>
-<body class="bg-[#F8F9FA] p-8">
-    <header class="mb-8 border-b-2 border-[#FFDD00] pb-4">
-        <h1 class="text-2xl font-bold text-gray-900">usBIM Strategy Canvas | EN TEAM</h1>
-    </header>
+<body class="bg-gray-100 p-6 font-sans">
+    <div class="max-w-7xl mx-auto">
+        <header class="flex justify-between items-center mb-8 bg-black p-6 rounded-lg">
+            <h1 class="text-white text-3xl font-bold">usBIM <span class="text-[#FFDD00]">Strategy Canvas</span></h1>
+            <div class="h-10 w-32 bg-[#FFDD00] rounded-sm"></div> </header>
 
-    <div id="canvas-grid" class="grid grid-cols-3 gap-6"></div>
+        <div id="canvas-grid" class="grid grid-cols-5 grid-rows-2 gap-4 h-[700px]">
+            </div>
+    </div>
 
     <script>
-        const sections = ["Key Partners", "Key Activities", "Key Resources", "Value Proposition", "Client Relationship", "Communication Channels", "Client Segments", "Structural Costs", "Revenue Streams"];
-        
+        const layout = [
+            { name: "Partner Chiave", col: "span 1", row: "span 2" },
+            { name: "Attività Chiave", col: "span 1", row: "span 1" },
+            { name: "Proposte di Valore", col: "span 1", row: "span 2" },
+            { name: "Relazioni con i Clienti", col: "span 1", row: "span 1" },
+            { name: "Segmenti di Clientela", col: "span 1", row: "span 2" },
+            { name: "Risorse Chiave", col: "span 1", row: "span 1" },
+            { name: "Canali", col: "span 1", row: "span 1" },
+            { name: "Struttura dei Costi", col: "span 2", row: "span 1" },
+            { name: "Flussi di Ricavi", col: "span 3", row: "span 1" }
+        ];
+
         const grid = document.getElementById('canvas-grid');
-        sections.forEach(sec => {
+        layout.forEach(sec => {
             grid.innerHTML += `
-                <div class="bg-white border p-4 rounded shadow-sm">
-                    <h2 class="font-bold text-sm uppercase text-gray-700 mb-4 border-b pb-2">${sec}</h2>
-                    <div id="content-${sec.replace(/ /g, '-')}" class="min-h-[100px] mb-2 text-xs"></div>
-                    <button onclick="addEntry('${sec}')" class="w-full bg-[#FFDD00] text-black font-bold py-2 rounded text-xs hover:bg-yellow-400">+ Add Record</button>
+                <div class="canvas-box bg-white p-4 rounded-xl flex flex-col" style="grid-column: ${sec.col}; grid-row: ${sec.row};">
+                    <h2 class="font-black text-xs uppercase tracking-widest text-gray-400 mb-3">${sec.name}</h2>
+                    <div id="content-${sec.name.replace(/ /g, '-')}" class="flex-grow overflow-y-auto space-y-3 mb-4"></div>
+                    <button onclick="addEntry('${sec.name}')" class="text-xs font-bold py-2 bg-gray-100 hover:bg-[#FFDD00] rounded transition-colors">+ ADD ENTRY</button>
                 </div>
             `;
         });
-
-        async function loadData() {
-            const res = await fetch('/api/canvas');
-            const data = await res.json();
-            data.forEach(entry => {
-                const div = document.getElementById(`content-${entry.section.replace(/ /g, '-')}`);
-                if (div) div.innerHTML += `<div class="p-2 mb-2 bg-gray-50 border rounded text-xs">${entry.content}</div>`;
-            });
-        }
-
-        async function addEntry(section) {
-            const content = prompt(`Add record to ${section}:`);
-            if (!content) return;
-            await fetch('/api/canvas', {
-                method: 'POST',
-                headers: {'Content-Type': 'application/json'},
-                body: JSON.stringify({ section, content })
-            });
-            location.reload();
-        }
-
-        loadData();
     </script>
 </body>
 </html>
