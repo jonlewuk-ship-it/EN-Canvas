@@ -7,8 +7,12 @@
         body { background-color: #050a14; color: #FFFFFF; font-family: 'Inter', sans-serif; }
         #canvas-grid { display: grid; grid-template-columns: repeat(5, 1fr); grid-template-rows: repeat(3, 1fr); gap: 12px; height: 750px; }
         .bmc-box { background: #0f172a; border: 1px solid #1e293b; padding: 12px; display: flex; flex-direction: column; overflow: hidden; }
+        /* Semi-transparent scroller */
+        .scroller { overflow-y: auto; scrollbar-width: thin; scrollbar-color: rgba(255, 221, 0, 0.3) transparent; flex-grow: 1; }
+        .scroller::-webkit-scrollbar { width: 6px; }
+        .scroller::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 4px; }
         .acca-yellow { color: #FFDD00; }
-        .entry-card { background: #1e293b; border-left: 3px solid #FFDD00; padding: 8px; margin-bottom: 8px; font-size: 0.75rem; position: relative; }
+        .entry-card { background: rgba(30, 41, 59, 0.7); border-left: 3px solid #FFDD00; padding: 8px; margin-bottom: 8px; font-size: 0.75rem; position: relative; }
     </style>
 </head>
 <body class="p-6">
@@ -20,7 +24,6 @@
     </header>
 
     <div id="canvas-grid">
-        <!-- 9-Box Standard Layout -->
         <div class="bmc-box" style="grid-area: 1 / 1 / 3 / 2;" data-section="Partner Chiave"></div>
         <div class="bmc-box" style="grid-area: 1 / 2 / 2 / 3;" data-section="Attività Chiave"></div>
         <div class="bmc-box" style="grid-area: 2 / 2 / 3 / 3;" data-section="Risorse Chiave"></div>
@@ -32,7 +35,6 @@
         <div class="bmc-box" style="grid-area: 3 / 3 / 4 / 6;" data-section="Flussi di Ricavi"></div>
     </div>
 
-    <!-- Modal -->
     <div id="modal" class="hidden fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50">
         <div class="bg-[#0f172a] p-8 rounded-2xl w-full max-w-xl border border-slate-700">
             <h2 id="modal-title" class="text-xl font-bold mb-4 acca-yellow"></h2>
@@ -49,9 +51,9 @@
         let currentEditId = null;
         const guidance = {
             "Partner Chiave": "Esempio: Esri, buildingSMART, system integrator locali.",
-            "Attività Chiave": "Esempio: Sviluppo plugin usBIM, localizzazione G-Gov.",
+            "Attività Chiave": "Esempio: Sviluppo plugin usBIM,...",
             "Risorse Chiave": "Esempio: Motore browser proprietario, capitale umano BIM.",
-            "Proposte di Valore": "Esempio: Interoperabilità a Perdita Zero (IFC), gemelli digitali.",
+            "Proposte di Valore": "Esempio: Interoperabilità a Zero Perdita dati (IFC), Digital Twins.",
             "Relazioni con i Clienti": "Esempio: Nurturing automatizzato, customer success dedicato.",
             "Canali": "Esempio: Marketplace globale, inbound freemium, webinar.",
             "Segmenti di Clientela": "Esempio: PA, Smart Cities, General Contractor.",
@@ -59,17 +61,17 @@
             "Flussi di Ricavi": "Esempio: SaaS pay-per-use, licenze Enterprise CDE."
         };
 
-        // Render Boxes
         document.querySelectorAll('.bmc-box').forEach(box => {
             const sec = box.getAttribute('data-section');
             box.innerHTML = `<h2 class="text-[9px] uppercase font-bold text-slate-500 mb-2">${sec}</h2>
-                             <div id="content-${sec.replace(/ /g, '-')}" class="flex-grow overflow-y-auto mb-2"></div>
-                             <button onclick="openModal('${sec}')" class="text-[9px] bg-slate-800 py-1 rounded hover:bg-slate-700">+ AGGIUNGI</button>`;
+                             <div id="content-${sec.replace(/ /g, '-')}" class="scroller"></div>
+                             <button onclick="openModal('${sec}')" class="mt-2 text-[9px] bg-slate-800 py-1 rounded hover:bg-slate-700">+ AGGIUNGI</button>`;
         });
 
         async function loadData() {
             const res = await fetch('/api/canvas');
             const data = await res.json();
+            document.querySelectorAll('.scroller').forEach(s => s.innerHTML = '');
             data.forEach(entry => {
                 const container = document.getElementById(`content-${entry.section.replace(/ /g, '-')}`);
                 if (container) {
@@ -98,18 +100,15 @@
         async function saveEntry() {
             const content = document.getElementById('entry-text').value;
             const section = document.getElementById('modal-title').innerText;
-            await fetch('/api/canvas', { 
-                method: 'POST', 
-                headers: {'Content-Type': 'application/json'}, 
-                body: JSON.stringify({ section, content, id: currentEditId }) 
-            });
-            location.reload();
+            await fetch('/api/canvas', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ section, content, id: currentEditId }) });
+            closeModal();
+            loadData();
         }
 
         async function deleteEntry(id) {
             if(confirm('Eliminare questa voce?')) {
                 await fetch('/api/canvas', { method: 'DELETE', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ id }) });
-                location.reload();
+                loadData();
             }
         }
 
