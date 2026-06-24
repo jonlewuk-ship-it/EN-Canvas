@@ -38,14 +38,21 @@
         <div class="bg-[#0f172a] p-8 rounded-2xl w-full max-w-xl border border-slate-700">
             <h2 id="modal-title" class="text-xl font-bold mb-4 acca-yellow"></h2>
             <textarea id="entry-text" class="w-full h-32 p-4 bg-slate-950 rounded border border-slate-700 text-white"></textarea>
-            <select id="entry-color" class="w-full mt-4 p-2 bg-slate-950 border border-slate-700 text-white rounded">
-                <option value="#1e293b">Default</option>
-                <option value="#7f1d1d">Red</option><option value="#78350f">Orange</option>
-                <option value="#713f12">Yellow</option><option value="#14532d">Green</option>
-                <option value="#064e3b">Teal</option><option value="#1e3a8a">Blue</option>
-                <option value="#312e81">Indigo</option><option value="#581c87">Purple</option>
-                <option value="#701a75">Fuchsia</option>
-            </select>
+            
+            <div id="color-palette" class="flex flex-wrap gap-2 mt-4">
+                <button type="button" onclick="selectColor('#1e293b')" class="w-8 h-8 rounded-full border border-slate-600 bg-[#1e293b]"></button>
+                <button type="button" onclick="selectColor('#450a0a')" class="w-8 h-8 rounded-full border border-slate-600 bg-[#450a0a]"></button>
+                <button type="button" onclick="selectColor('#431407')" class="w-8 h-8 rounded-full border border-slate-600 bg-[#431407]"></button>
+                <button type="button" onclick="selectColor('#422006')" class="w-8 h-8 rounded-full border border-slate-600 bg-[#422006]"></button>
+                <button type="button" onclick="selectColor('#064e3b')" class="w-8 h-8 rounded-full border border-slate-600 bg-[#064e3b]"></button>
+                <button type="button" onclick="selectColor('#166534')" class="w-8 h-8 rounded-full border border-slate-600 bg-[#166534]"></button>
+                <button type="button" onclick="selectColor('#1e3a8a')" class="w-8 h-8 rounded-full border border-slate-600 bg-[#1e3a8a]"></button>
+                <button type="button" onclick="selectColor('#312e81')" class="w-8 h-8 rounded-full border border-slate-600 bg-[#312e81]"></button>
+                <button type="button" onclick="selectColor('#4a044e')" class="w-8 h-8 rounded-full border border-slate-600 bg-[#4a044e]"></button>
+                <button type="button" onclick="selectColor('#581c87')" class="w-8 h-8 rounded-full border border-slate-600 bg-[#581c87]"></button>
+            </div>
+            <input type="hidden" id="selected-color" value="#1e293b">
+            
             <div id="modal-guidance" class="mt-4"></div>
             <div class="flex justify-end gap-3 mt-6">
                 <button onclick="closeModal()" class="text-slate-400">Annulla</button>
@@ -68,6 +75,12 @@
             "Flussi di Ricavi": "Esempio: SaaS pay-per-use, licenze Enterprise CDE."
         };
 
+        function selectColor(color) {
+            document.getElementById('selected-color').value = color;
+            document.querySelectorAll('#color-palette button').forEach(b => b.style.outline = 'none');
+            event.target.style.outline = '2px solid #FFDD00';
+        }
+
         document.querySelectorAll('.bmc-box').forEach(box => {
             const sec = box.getAttribute('data-section');
             box.innerHTML = `<h2 class="text-[9px] uppercase font-bold text-slate-500 mb-2">${sec}</h2>
@@ -83,7 +96,7 @@
                 const container = document.getElementById(`content-${entry.section.replace(/ /g, '-')}`);
                 if (container) {
                     container.innerHTML += `
-                        <div class="entry-card" style="background-color: ${entry.color || '#1e293b'}">
+                        <div class="entry-card" style="background-color: ${entry.color || '#1e293b'} !important;">
                             ${entry.content}
                             <div class="flex gap-2 mt-2 justify-end">
                                 <button onclick="editEntry(${entry.id}, '${entry.content.replace(/'/g, "\\'")}', '${entry.section}', '${entry.color}')" class="text-blue-400 text-[10px]">✎ Edit</button>
@@ -98,7 +111,7 @@
             currentEditId = id;
             document.getElementById('modal-title').innerText = sec;
             document.getElementById('entry-text').value = content;
-            document.getElementById('entry-color').value = color;
+            document.getElementById('selected-color').value = color;
             document.getElementById('modal-guidance').innerHTML = `<p class="text-[10px] text-[#FFDD00] uppercase font-bold">Guida:</p><p class="text-xs text-slate-300 italic">${guidance[sec]}</p>`;
             document.getElementById('modal').classList.remove('hidden');
         }
@@ -108,7 +121,7 @@
         async function saveEntry() {
             const content = document.getElementById('entry-text').value;
             const section = document.getElementById('modal-title').innerText;
-            const color = document.getElementById('entry-color').value;
+            const color = document.getElementById('selected-color').value;
             await fetch('/api/canvas', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ section, content, id: currentEditId, color }) });
             closeModal();
             loadData();
