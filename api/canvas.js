@@ -1,12 +1,12 @@
 import { Pool } from 'pg';
 
 export default async function handler(req, res) {
-  // Check for the most common connection string keys
-  const connectionString = process.env.POSTGRES_URL || process.env.DATABASE_URL;
-  
+  // Use the connection string Vercel provided
   const pool = new Pool({
-    connectionString: connectionString,
-    ssl: { rejectUnauthorized: false }
+    connectionString: process.env.POSTGRES_URL,
+    ssl: {
+      rejectUnauthorized: false
+    }
   });
 
   try {
@@ -21,7 +21,7 @@ export default async function handler(req, res) {
       return res.status(200).json(rows);
     }
   } catch (error) {
-    // This will help us identify the specific error in the Network Response tab
-    return res.status(500).json({ error: error.toString(), stack: error.stack });
+    // Return error to see exactly why it fails in the Network tab
+    return res.status(500).json({ error: error.message });
   }
 }
