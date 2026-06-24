@@ -4,81 +4,78 @@
     <meta charset="UTF-8">
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        body { background-color: #050a14; color: #FFFFFF; font-family: 'Inter', sans-serif; }
+        body { background-color: #050a14; color: #FFFFFF; }
         .canvas-card { background: #0f172a; border: 1px solid #1e293b; }
-        .entry-card { background: #1e293b; border-left: 4px solid #FFDD00; }
         .acca-yellow { color: #FFDD00; }
+        .entry-card { background: #1e293b; border-left: 4px solid #FFDD00; padding: 10px; margin-bottom: 8px; border-radius: 4px; }
+        /* Tooltip styling */
+        .tooltip { position: relative; cursor: help; }
+        .tooltip:hover::after { content: attr(data-tip); position: absolute; left: 0; top: 100%; background: #334155; padding: 5px; border-radius: 4px; font-size: 10px; width: 200px; z-index: 10; color: white; }
     </style>
 </head>
 <body class="p-8">
-    <!-- Header -->
-    <header class="mb-10 border-b border-slate-800 pb-6 flex justify-between items-center">
-        <div>
-            <h1 class="text-4xl font-extrabold">ACCA <span class="acca-yellow">BIM Strategy Canvas</span></h1>
-            <p class="text-slate-400 mt-2 font-medium tracking-wide">EN-TEAM | Global Market Intelligence Portal</p>
-        </div>
-        <div class="text-right">
-            <span class="bg-[#FFDD00] text-black px-3 py-1 text-xs font-bold rounded">OPENBIM V.2026</span>
-        </div>
+    <header class="mb-10 border-b border-slate-800 pb-6">
+        <h1 class="text-4xl font-extrabold">ACCA <span class="acca-yellow">BIM Strategy Canvas</span></h1>
+        <p class="text-slate-400 mt-2">EN-TEAM | Global Market Intelligence Portal</p>
     </header>
 
     <div id="canvas-grid" class="grid grid-cols-5 grid-rows-2 gap-4 h-[750px]"></div>
 
-    <!-- Enhanced Modal -->
+    <!-- Modal -->
     <div id="modal" class="hidden fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50">
         <div class="bg-[#0f172a] p-8 rounded-2xl w-full max-w-xl border border-slate-700 shadow-2xl">
-            <h2 id="modal-title" class="text-2xl font-bold mb-2 acca-yellow"></h2>
-            <p id="modal-help" class="text-sm text-slate-400 mb-6 italic border-l-2 border-slate-600 pl-4"></p>
+            <h2 id="modal-title" class="text-2xl font-bold mb-4 acca-yellow"></h2>
             <textarea id="entry-text" class="w-full h-40 p-4 rounded bg-slate-950 text-white border border-slate-700 mb-6" placeholder="Inserisci qui la strategia..."></textarea>
             <div class="flex justify-end gap-3">
                 <button onclick="closeModal()" class="px-5 py-2 text-slate-400">Annulla</button>
-                <button onclick="saveEntry()" class="px-8 py-2 bg-[#FFDD00] text-black font-bold rounded">Salva Strategia</button>
+                <button id="save-btn" class="px-8 py-2 bg-[#FFDD00] text-black font-bold rounded">Salva Strategia</button>
             </div>
         </div>
     </div>
 
     <script>
-    const sections = [
-        { name: "Partner Chiave", help: "Identifica alleanze strategiche, partner BIM-GIS e fornitori chiave per il mercato EN." },
-        { name: "Attività Chiave", help: "Definisci le attività critiche: R&D, localizzazione, supporto tecnico." },
-        { name: "Proposte di Valore", help: "Perché usBIM? Enfatizza l'interoperabilità, il CDE e i vantaggi competitivi." },
-        { name: "Relazioni con i Clienti", help: "Strategie di retention, supporto dedicato e community management." },
-        { name: "Segmenti di Clientela", help: "Target specifici: Pubblica Amministrazione, General Contractor, Studi di Progettazione." },
-        { name: "Risorse Chiave", help: "Risorse tecnologiche, umane e infrastrutture cloud proprietarie." },
-        { name: "Canali", help: "Come raggiungiamo il cliente? Marketplace, webinar, vendita diretta." },
-        { name: "Struttura dei Costi", help: "Analisi dei costi operativi, cloud hosting, spese di marketing." },
-        { name: "Flussi di Ricavi", help: "Modelli di monetizzazione: SaaS, licenze Enterprise, servizi professionali." }
-    ];
+        const sections = [
+            { name: "Partner Chiave", help: "Alleanze, partner BIM-GIS e fornitori." },
+            { name: "Attività Chiave", help: "R&D, localizzazione, supporto tecnico." },
+            { name: "Proposte di Valore", help: "Interoperabilità, CDE, vantaggi competitivi." },
+            { name: "Relazioni con i Clienti", help: "Retention, supporto, community." },
+            { name: "Segmenti di Clientela", help: "PA, General Contractor, Progettisti." },
+            { name: "Risorse Chiave", help: "Tecnologia, capitale umano, cloud." },
+            { name: "Canali", help: "Marketplace, webinar, vendita diretta." },
+            { name: "Struttura dei Costi", help: "Hosting, R&D, marketing." },
+            { name: "Flussi di Ricavi", help: "SaaS, licenze Enterprise." }
+        ];
 
-    function renderGrid() {
-        const grid = document.getElementById('canvas-grid');
-        grid.innerHTML = ''; // Clear first
-        sections.forEach(sec => {
-            const safeName = sec.name.replace(/ /g, '-');
-            grid.innerHTML += `
-                <div class="canvas-card p-5 rounded-2xl flex flex-col">
-                    <h2 class="text-[10px] uppercase font-bold text-slate-400 mb-4">${sec.name}</h2>
-                    <div id="content-${safeName}" class="flex-grow overflow-y-auto space-y-2 text-sm text-white"></div>
-                    <button onclick="openModal('${sec.name}')" class="w-full py-2 bg-slate-700 hover:bg-slate-600 rounded text-[10px] font-bold">+ AGGIUNGI</button>
-                </div>
-            `;
-        });
-    }
-
-    async function loadData() {
-        try {
-            const res = await fetch('/api/canvas');
-            const data = await res.json();
-            data.forEach(entry => {
-                const el = document.getElementById(`content-${entry.section.replace(/ /g, '-')}`);
-                if (el) el.innerHTML += `<div class="entry-card p-2 rounded mb-2 border-l-2 border-[#FFDD00]">${entry.content}</div>`;
+        function renderGrid() {
+            const grid = document.getElementById('canvas-grid');
+            sections.forEach(sec => {
+                const div = document.createElement('div');
+                div.className = "canvas-card p-5 rounded-2xl flex flex-col tooltip";
+                div.setAttribute('data-tip', sec.help);
+                div.innerHTML = `
+                    <h2 class="text-[10px] uppercase font-bold text-slate-400 mb-4">${sec.name} ⓘ</h2>
+                    <div id="content-${sec.name.replace(/ /g, '-')}" class="flex-grow overflow-y-auto space-y-2 text-sm text-white"></div>
+                    <button class="add-btn w-full py-2 bg-slate-700 hover:bg-slate-600 rounded text-[10px] font-bold" data-section="${sec.name}">+ AGGIUNGI</button>
+                `;
+                grid.appendChild(div);
             });
-        } catch (e) { console.error("Database load error:", e); }
-    }
+            // Attach event listeners after rendering
+            document.querySelectorAll('.add-btn').forEach(btn => {
+                btn.onclick = () => openModal(btn.getAttribute('data-section'));
+            });
+        }
 
-    // Initialize
-    renderGrid();
-    loadData();
-</script>
+        let activeSection = "";
+        function openModal(sec) { activeSection = sec; document.getElementById('modal-title').innerText = sec; document.getElementById('modal').classList.remove('hidden'); }
+        function closeModal() { document.getElementById('modal').classList.add('hidden'); }
+        async function saveEntry() {
+            const content = document.getElementById('entry-text').value;
+            await fetch('/api/canvas', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ section: activeSection, content }) });
+            location.reload();
+        }
+        document.getElementById('save-btn').onclick = saveEntry;
+        
+        renderGrid();
+    </script>
 </body>
 </html>
