@@ -1,8 +1,12 @@
 import { Pool } from 'pg';
 
 export default async function handler(req, res) {
+  // Check for the most common connection string keys
+  const connectionString = process.env.POSTGRES_URL || process.env.DATABASE_URL;
+  
   const pool = new Pool({
-    connectionString: process.env.POSTGRES_URL,
+    connectionString: connectionString,
+    ssl: { rejectUnauthorized: false }
   });
 
   try {
@@ -17,6 +21,7 @@ export default async function handler(req, res) {
       return res.status(200).json(rows);
     }
   } catch (error) {
-    return res.status(500).json({ error: error.message });
+    // This will help us identify the specific error in the Network Response tab
+    return res.status(500).json({ error: error.toString(), stack: error.stack });
   }
 }
