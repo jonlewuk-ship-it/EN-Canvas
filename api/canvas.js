@@ -1,10 +1,12 @@
 import { Client } from 'pg';
 
 export default async function handler(req, res) {
-  // Ensure we are using the environment variable Vercel assigned to your project
+  // Use the exact POSTGRES_URL provided by your Neon dashboard
   const client = new Client({
     connectionString: process.env.POSTGRES_URL,
-    ssl: { rejectUnauthorized: false } // Required for Neon/Vercel Postgres
+    ssl: {
+      rejectUnauthorized: false
+    }
   });
 
   try {
@@ -21,7 +23,7 @@ export default async function handler(req, res) {
       return res.status(200).json(rows);
     }
   } catch (error) {
-    console.error("Database error:", error);
+    console.error("Database connection error:", error);
     return res.status(500).json({ error: error.message });
   } finally {
     await client.end();
