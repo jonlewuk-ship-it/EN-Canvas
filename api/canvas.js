@@ -19,10 +19,19 @@ export default async function handler(req, res) {
     
     else if (method === 'POST') {
       const { id, section, content, color } = req.body;
+      
       if (id) {
-        await pool.query('UPDATE canvas_entries SET content = $1, color = $3 WHERE id = $2', [content, id, color]);
+        // Explicitly updating content AND color for edits
+        await pool.query(
+          'UPDATE canvas_entries SET content = $1, color = $3 WHERE id = $2', 
+          [content, id, color]
+        );
       } else {
-        await pool.query('INSERT INTO canvas_entries (section, content, color) VALUES ($1, $2, $3)', [section, content, color]);
+        // Creating new entry with color
+        await pool.query(
+          'INSERT INTO canvas_entries (section, content, color) VALUES ($1, $2, $3)', 
+          [section, content, color]
+        );
       }
       return res.status(200).json({ success: true });
     } 
