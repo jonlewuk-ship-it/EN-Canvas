@@ -5,16 +5,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body { background-color: #050a14; color: #FFFFFF; font-family: 'Inter', sans-serif; }
-        #canvas-grid {
-            display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            grid-template-rows: repeat(3, 1fr);
-            gap: 12px;
-            height: 750px;
-        }
-        .bmc-box { background: #0f172a; border: 1px solid #1e293b; padding: 12px; display: flex; flex-direction: column; }
+        #canvas-grid { display: grid; grid-template-columns: repeat(5, 1fr); grid-template-rows: repeat(3, 1fr); gap: 12px; height: 750px; }
+        .bmc-box { background: #0f172a; border: 1px solid #1e293b; padding: 12px; display: flex; flex-direction: column; overflow: hidden; }
         .acca-yellow { color: #FFDD00; }
-        .entry-card { background: #1e293b; border-left: 4px solid #FFDD00; padding: 8px; margin-bottom: 8px; font-size: 0.8rem; }
+        .entry-card { background: #1e293b; border-left: 3px solid #FFDD00; padding: 8px; margin-bottom: 8px; font-size: 0.75rem; position: relative; }
     </style>
 </head>
 <body class="p-6">
@@ -26,6 +20,7 @@
     </header>
 
     <div id="canvas-grid">
+        <!-- 9-Box Standard Layout -->
         <div class="bmc-box" style="grid-area: 1 / 1 / 3 / 2;" data-section="Partner Chiave"></div>
         <div class="bmc-box" style="grid-area: 1 / 2 / 2 / 3;" data-section="Attività Chiave"></div>
         <div class="bmc-box" style="grid-area: 2 / 2 / 3 / 3;" data-section="Risorse Chiave"></div>
@@ -45,12 +40,13 @@
             <div id="modal-guidance" class="mt-4"></div>
             <div class="flex justify-end gap-3 mt-6">
                 <button onclick="closeModal()" class="text-slate-400">Annulla</button>
-                <button onclick="saveEntry()" class="px-6 py-2 bg-[#FFDD00] text-black font-bold rounded">Salva Strategia</button>
+                <button id="save-btn" class="px-6 py-2 bg-[#FFDD00] text-black font-bold rounded">Salva Strategia</button>
             </div>
         </div>
     </div>
 
     <script>
+        let currentEditId = null;
         const guidance = {
             "Partner Chiave": "Esempio: Esri, buildingSMART, system integrator locali.",
             "Attività Chiave": "Esempio: Sviluppo plugin usBIM, localizzazione G-Gov.",
@@ -71,14 +67,55 @@
                              <button onclick="openModal('${sec}')" class="text-[9px] bg-slate-800 py-1 rounded hover:bg-slate-700">+ AGGIUNGI</button>`;
         });
 
-        function openModal(sec) {
+        async function loadData() {
+            const res = await fetch('/api/canvas');
+            const data = await res.json();
+            data.forEach(entry => {
+                const container = document.getElementById(`content-${entry.section.replace(/ /g, '-')}`);
+                if (container) {
+                    container.innerHTML += `
+                        <div class="entry-card">
+                            ${entry.content}
+                            <div class="flex gap-2 mt-2 justify-end">
+                                <button onclick="editEntry(${entry.id}, '${entry.content.replace(/'/g, "\\'")}', '${entry.section}')" class="text-blue-400 text-[10px]">✎ Edit</button>
+                                <button onclick="deleteEntry(${entry.id})" class="text-red-400 text-[10px]">✕ Delete</button>
+                            </div>
+                        </div>`;
+                }
+            });
+        }
+
+        function openModal(sec, id = null, content = '') {
+            currentEditId = id;
             document.getElementById('modal-title').innerText = sec;
+            document.getElementById('entry-text').value = content;
             document.getElementById('modal-guidance').innerHTML = `<p class="text-[10px] text-[#FFDD00] uppercase font-bold">Guida:</p><p class="text-xs text-slate-300 italic">${guidance[sec]}</p>`;
             document.getElementById('modal').classList.remove('hidden');
         }
-        
+
         function closeModal() { document.getElementById('modal').classList.add('hidden'); }
-        // ... (Include your existing fetch/save logic here)
+
+        async function saveEntry() {
+            const content = document.getElementById('entry-text').value;
+            const section = document.getElementById('modal-title').innerText;
+            await fetch('/api/canvas', { 
+                method: 'POST', 
+                headers: {'Content-Type': 'application/json'}, 
+                body: JSON.stringify({ section, content, id: currentEditId }) 
+            });
+            location.reload();
+        }
+
+        async function deleteEntry(id) {
+            if(confirm('Eliminare questa voce?')) {
+                await fetch('/api/canvas', { method: 'DELETE', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ id }) });
+                location.reload();
+            }
+        }
+
+        function editEntry(id, content, section) { openModal(section, id, content); }
+        document.getElementById('save-btn').onclick = saveEntry;
+        loadData();
     </script>
 </body>
 </html>
