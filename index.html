@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         body { background-color: #050a14; color: #FFFFFF; font-family: 'Inter', sans-serif; }
         .viewport { height: 100vh; overflow-y: auto; padding-bottom: 50px; }
@@ -22,15 +23,15 @@
         </header>
 
         <div id="canvas-grid">
-            <div class="bmc-box" style="grid-area: 1 / 1 / 3 / 2;" data-section="Partner Chiave"></div>
-            <div class="bmc-box" style="grid-area: 1 / 2 / 2 / 3;" data-section="Attività Chiave"></div>
-            <div class="bmc-box" style="grid-area: 2 / 2 / 3 / 3;" data-section="Risorse Chiave"></div>
-            <div class="bmc-box" style="grid-area: 1 / 3 / 3 / 4;" data-section="Proposte di Valore"></div>
-            <div class="bmc-box" style="grid-area: 1 / 4 / 2 / 5;" data-section="Relazioni con i Clienti"></div>
-            <div class="bmc-box" style="grid-area: 2 / 4 / 3 / 5;" data-section="Canali"></div>
-            <div class="bmc-box" style="grid-area: 1 / 5 / 3 / 6;" data-section="Segmenti di Clientela"></div>
-            <div class="bmc-box" style="grid-area: 3 / 1 / 4 / 3;" data-section="Struttura dei Costi"></div>
-            <div class="bmc-box" style="grid-area: 3 / 3 / 4 / 6;" data-section="Flussi di Ricavi"></div>
+            <div class="bmc-box" style="grid-area: 1 / 1 / 3 / 2;" data-section="Partner Chiave" data-icon="handshake"></div>
+            <div class="bmc-box" style="grid-area: 1 / 2 / 2 / 3;" data-section="Attività Chiave" data-icon="settings"></div>
+            <div class="bmc-box" style="grid-area: 2 / 2 / 3 / 3;" data-section="Risorse Chiave" data-icon="database"></div>
+            <div class="bmc-box" style="grid-area: 1 / 3 / 3 / 4;" data-section="Proposte di Valore" data-icon="gift"></div>
+            <div class="bmc-box" style="grid-area: 1 / 4 / 2 / 5;" data-section="Relazioni con i Clienti" data-icon="heart"></div>
+            <div class="bmc-box" style="grid-area: 2 / 4 / 3 / 5;" data-section="Canali" data-icon="truck"></div>
+            <div class="bmc-box" style="grid-area: 1 / 5 / 3 / 6;" data-section="Segmenti di Clientela" data-icon="users"></div>
+            <div class="bmc-box" style="grid-area: 3 / 1 / 4 / 3;" data-section="Struttura dei Costi" data-icon="trending-down"></div>
+            <div class="bmc-box" style="grid-area: 3 / 3 / 4 / 6;" data-section="Flussi di Ricavi" data-icon="trending-up"></div>
         </div>
     </div>
 
@@ -83,10 +84,17 @@
 
         document.querySelectorAll('.bmc-box').forEach(box => {
             const sec = box.getAttribute('data-section');
-            box.innerHTML = `<h2 class="text-[9px] uppercase font-bold text-slate-500 mb-2">${sec}</h2>
-                             <div id="content-${sec.replace(/ /g, '-')}" class="flex-grow"></div>
-                             <button onclick="openModal('${sec}')" class="mt-4 text-[9px] bg-slate-800 py-1 rounded hover:bg-slate-700">+ AGGIUNGI</button>`;
+            const iconName = box.getAttribute('data-icon');
+            box.innerHTML = `
+                <div class="flex items-center gap-2 mb-2">
+                    <i data-lucide="${iconName}" class="w-4 h-4 text-[#FFDD00]"></i>
+                    <h2 class="text-[9px] uppercase font-bold text-slate-500">${sec}</h2>
+                </div>
+                <div id="content-${sec.replace(/ /g, '-')}" class="flex-grow"></div>
+                <button onclick="openModal('${sec}')" class="mt-4 text-[9px] bg-slate-800 py-1 rounded hover:bg-slate-700">+ AGGIUNGI</button>`;
         });
+
+        lucide.createIcons();
 
         async function loadData() {
             const res = await fetch('/api/canvas');
