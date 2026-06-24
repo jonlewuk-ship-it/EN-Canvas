@@ -7,7 +7,6 @@
     <style>
         body { 
             background-color: #050a14; 
-            /* Added Sketched Data Background Effect */
             background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23FFDD00' fill-opacity='0.15'%3E%3Ccircle cx='20' cy='20' r='2'/%3E%3Ccircle cx='100' cy='50' r='2'/%3E%3Ccircle cx='180' cy='180' r='2'/%3E%3Ccircle cx='50' cy='150' r='2'/%3E%3Cpath d='M20 20L100 50L180 180L50 150L20 20Z' stroke='%23FFDD00' stroke-width='0.5' stroke-opacity='0.2' fill='none'/%3E%3C/g%3E%3C/svg%3E");
             background-repeat: repeat;
             color: #FFFFFF; 
@@ -16,8 +15,11 @@
         .viewport { height: 100vh; overflow-y: auto; padding-bottom: 50px; }
         .viewport::-webkit-scrollbar { width: 8px; }
         .viewport::-webkit-scrollbar-thumb { background: rgba(255, 221, 0, 0.2); border-radius: 10px; }
-        #canvas-grid { display: grid; grid-template-columns: repeat(5, 1fr); grid-auto-rows: minmax(200px, auto); gap: 16px; margin: 0 32px; }
-        .bmc-box { background: #0f172a; border: 1px solid #1e293b; padding: 16px; display: flex; flex-direction: column; transition: border 0.3s ease; }
+        
+        /* Adjusted grid for better screen utilization */
+        #canvas-grid { display: grid; grid-template-columns: repeat(5, 1fr); grid-auto-rows: minmax(250px, auto); gap: 20px; margin: 0 48px; }
+        
+        .bmc-box { background: #0f172a; border: 1px solid #1e293b; padding: 20px; display: flex; flex-direction: column; transition: border 0.3s ease; }
         .bmc-box:hover { border-color: #FFDD00; }
         .acca-yellow { color: #FFDD00; }
         .entry-card { border-left: 3px solid #FFDD00; padding: 12px; margin-bottom: 10px; font-size: 0.95rem; transition: all 0.3s ease; position: relative; }
@@ -29,9 +31,9 @@
 </head>
 <body class="p-0 m-0">
     <div class="viewport">
-        <header class="p-8 border-b border-slate-800 mb-6 bg-[#050a14]/80 backdrop-blur-sm">
-            <h1 class="text-3xl font-extrabold">ACCA <span class="acca-yellow">BIM Strategy Canvas</span></h1>
-            <p class="text-slate-400 text-sm">EN-TEAM | Global Market Intelligence Portal</p>
+        <header class="p-10 border-b border-slate-800 mb-8 bg-[#050a14]/80 backdrop-blur-sm">
+            <h1 class="text-4xl font-extrabold tracking-tight">ACCA <span class="acca-yellow">BIM Strategy Canvas</span></h1>
+            <p class="text-slate-400 text-sm mt-1">EN-TEAM | Global Market Intelligence Portal</p>
         </header>
 
         <div id="canvas-grid">
@@ -47,6 +49,7 @@
         </div>
     </div>
 
+    <!-- Modal remains unchanged -->
     <div id="modal" class="hidden fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50">
         <div class="bg-[#0f172a] p-8 rounded-2xl w-full max-w-xl border border-slate-700">
             <h2 id="modal-title" class="text-xl font-bold mb-4 acca-yellow"></h2>
@@ -64,7 +67,6 @@
                 <button type="button" onclick="selectColor('#581c87')" class="color-btn w-8 h-8 rounded-full border border-slate-600 bg-[#581c87]"></button>
             </div>
             <input type="hidden" id="selected-color" value="#1e293b">
-            <div id="modal-guidance" class="mt-4"></div>
             <div class="flex justify-end gap-3 mt-6">
                 <button onclick="closeModal()" class="text-slate-400">Annulla</button>
                 <button id="save-btn" class="px-6 py-2 bg-[#FFDD00] text-black font-bold rounded">Salva Strategia</button>
@@ -73,9 +75,7 @@
     </div>
 
     <script>
-        // JS functionality remains unchanged to ensure data persistence
         let currentEditId = null;
-
         function initCanvas() {
             document.querySelectorAll('.bmc-box').forEach(box => {
                 const sec = box.getAttribute('data-section');
@@ -86,22 +86,10 @@
                         <h2 class="text-xs uppercase font-semibold text-slate-300 tracking-wider">${sec}</h2>
                     </div>
                     <div id="content-${sec.replace(/ /g, '-')}" class="flex-grow"></div>
-                    <button onclick="openModal('${sec}')" class="mt-4 text-[9px] bg-slate-800 py-1 rounded hover:bg-slate-700">+ AGGIUNGI</button>`;
+                    <button onclick="openModal('${sec}')" class="mt-4 text-[9px] bg-slate-800 py-1 rounded hover:bg-slate-700 w-full">+ AGGIUNGI</button>`;
             });
             lucide.createIcons();
             loadData();
-        }
-
-        function showDeleteConfirm(id) {
-            const card = document.getElementById(`card-${id}`);
-            const div = document.createElement('div');
-            div.className = 'delete-confirm';
-            div.innerHTML = `
-                <span class="text-[9px] text-white uppercase mr-1">Eliminare?</span>
-                <button onclick="deleteEntry(${id})" class="text-green-500 font-bold hover:scale-125 transition-transform text-lg">✓</button>
-                <button onclick="this.parentElement.remove()" class="text-red-500 font-bold hover:scale-125 transition-transform text-lg">✕</button>
-            `;
-            card.appendChild(div);
         }
 
         async function loadData() {
@@ -123,6 +111,18 @@
                     }
                 });
             } catch (e) { console.error("Error loading data"); }
+        }
+
+        function showDeleteConfirm(id) {
+            const card = document.getElementById(`card-${id}`);
+            const div = document.createElement('div');
+            div.className = 'delete-confirm';
+            div.innerHTML = `
+                <span class="text-[9px] text-white uppercase mr-1">Eliminare?</span>
+                <button onclick="deleteEntry(${id})" class="text-green-500 font-bold hover:scale-125 transition-transform text-lg">✓</button>
+                <button onclick="this.parentElement.remove()" class="text-red-500 font-bold hover:scale-125 transition-transform text-lg">✕</button>
+            `;
+            card.appendChild(div);
         }
 
         function selectColor(color) {
@@ -157,7 +157,6 @@
 
         function editEntry(id, content, section, color) { openModal(section, id, content, color); }
         document.getElementById('save-btn').onclick = saveEntry;
-        
         window.onload = initCanvas;
     </script>
 </body>
