@@ -7,41 +7,32 @@ const pool = new Pool({
 
 export default async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store, max-age=0');
-  res.setHeader('Content-Type', 'application/json');
-
-  const { method } = req;
-
+  
   try {
-    if (method === 'GET') {
+    if (req.method === 'GET') {
       const { rows } = await pool.query('SELECT * FROM canvas_entries ORDER BY created_at ASC');
       return res.status(200).json(rows);
     } 
     
-    else if (method === 'POST') {
+    if (req.method === 'POST') {
       const { id, section, content, color } = req.body;
       
       if (id) {
-        // Corrected Parameter Order: $1=content, $2=color, $3=id
-        await pool.query(
-          'UPDATE canvas_entries SET content = $1, color = $2 WHERE id = $3', 
-          [content, color, id]
-        );
+        // Ensure column order matches the array [content, color, id]
+        await pool.query('UPDATE canvas_entries SET content = $1, color = $2 WHERE id = $3', [content, color, id]);
       } else {
-        await pool.query(
-          'INSERT INTO canvas_entries (section, content, color) VALUES ($1, $2, $3)', 
-          [section, content, color]
-        );
+        await pool.query('INSERT INTO canvas_entries (section, content, color) VALUES ($1, $2, $3)', [section, content, color]);
       }
       return res.status(200).json({ success: true });
-    } 
-    
-    else if (method === 'DELETE') {
-      const { id } = req.body;
-      await pool.query('DELETE FROM canvas_entries WHERE id = $1', [id]);
+    }
+
+    if (req.method === 'DELETE') {
+      await pool.query('DELETE FROM canvas_entries WHERE id = $1', [req.body.id]);
       return res.status(200).json({ success: true });
     }
   } catch (error) {
-    console.error("API Error:", error);
+    // This will appear in your Vercel logs/console if the SQL fails
+    console.error("DATABASE ERROR:", error);
     return res.status(500).json({ error: error.message });
   }
 }
