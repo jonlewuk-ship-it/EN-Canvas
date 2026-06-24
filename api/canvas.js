@@ -21,13 +21,12 @@ export default async function handler(req, res) {
       const { id, section, content, color } = req.body;
       
       if (id) {
-        // Explicitly updating content AND color for edits
+        // Corrected Parameter Order: $1=content, $2=color, $3=id
         await pool.query(
-          'UPDATE canvas_entries SET content = $1, color = $3 WHERE id = $2', 
-          [content, id, color]
+          'UPDATE canvas_entries SET content = $1, color = $2 WHERE id = $3', 
+          [content, color, id]
         );
       } else {
-        // Creating new entry with color
         await pool.query(
           'INSERT INTO canvas_entries (section, content, color) VALUES ($1, $2, $3)', 
           [section, content, color]
@@ -42,6 +41,7 @@ export default async function handler(req, res) {
       return res.status(200).json({ success: true });
     }
   } catch (error) {
+    console.error("API Error:", error);
     return res.status(500).json({ error: error.message });
   }
 }
