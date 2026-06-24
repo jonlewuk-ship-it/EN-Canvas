@@ -10,9 +10,11 @@
         .viewport::-webkit-scrollbar { width: 8px; }
         .viewport::-webkit-scrollbar-thumb { background: rgba(255, 221, 0, 0.2); border-radius: 10px; }
         #canvas-grid { display: grid; grid-template-columns: repeat(5, 1fr); grid-auto-rows: minmax(200px, auto); gap: 16px; margin: 0 32px; }
-        .bmc-box { background: #0f172a; border: 1px solid #1e293b; padding: 16px; display: flex; flex-direction: column; }
+        .bmc-box { background: #0f172a; border: 1px solid #1e293b; padding: 16px; display: flex; flex-direction: column; transition: border 0.3s ease; }
+        .bmc-box:hover { border-color: #FFDD00; }
         .acca-yellow { color: #FFDD00; }
-        .entry-card { border-left: 3px solid #FFDD00; padding: 10px; margin-bottom: 8px; font-size: 0.8rem; }
+        .entry-card { border-left: 3px solid #FFDD00; padding: 12px; margin-bottom: 10px; font-size: 0.95rem; transition: all 0.3s ease; }
+        .entry-card:hover { transform: scale(1.02); filter: brightness(1.2); box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3); }
     </style>
 </head>
 <body class="p-0 m-0">
@@ -35,11 +37,11 @@
         </div>
     </div>
 
+    <!-- Modal and Scripts remain identical for functionality -->
     <div id="modal" class="hidden fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50">
         <div class="bg-[#0f172a] p-8 rounded-2xl w-full max-w-xl border border-slate-700">
             <h2 id="modal-title" class="text-xl font-bold mb-4 acca-yellow"></h2>
             <textarea id="entry-text" class="w-full h-32 p-4 bg-slate-950 rounded border border-slate-700 text-white"></textarea>
-            
             <div id="color-palette" class="flex flex-wrap gap-2 mt-4">
                 <button type="button" onclick="selectColor('#1e293b')" class="w-8 h-8 rounded-full border border-slate-600 bg-[#1e293b]"></button>
                 <button type="button" onclick="selectColor('#450a0a')" class="w-8 h-8 rounded-full border border-slate-600 bg-[#450a0a]"></button>
@@ -53,7 +55,6 @@
                 <button type="button" onclick="selectColor('#581c87')" class="w-8 h-8 rounded-full border border-slate-600 bg-[#581c87]"></button>
             </div>
             <input type="hidden" id="selected-color" value="#1e293b">
-            
             <div id="modal-guidance" class="mt-4"></div>
             <div class="flex justify-end gap-3 mt-6">
                 <button onclick="closeModal()" class="text-slate-400">Annulla</button>
