@@ -1,44 +1,29 @@
-<script>
-        // REPLACE THESE STRINGS WITH YOUR ACTUAL SUPABASE CREDENTIALS
-        const SUPABASE_URL = 'YOUR_SUPABASE_URL_HERE';
-        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY_HERE';
-        
-        const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="bg-[#F8F9FA] p-8">
+    <h1 class="text-2xl font-bold mb-8">usBIM Strategy Canvas | EN TEAM</h1>
+    <div id="canvas-grid" class="grid grid-cols-3 gap-6"></div>
 
-        const sections = [
-            "Key Partners", "Key Activities", "Key Resources", 
-            "Value Proposition", "Client Relationship", "Communication Channels", 
-            "Client Segments", "Structural Costs", "Revenue Streams"
-        ];
-
+    <script>
+        // Draw the grid first, then try to connect to the DB
+        const sections = ["Key Partners", "Key Activities", "Key Resources", "Value Proposition", "Client Relationship", "Communication Channels", "Client Segments", "Structural Costs", "Revenue Streams"];
         const grid = document.getElementById('canvas-grid');
+        
         sections.forEach(sec => {
-            const sectionId = sec.replace(/ /g, '-');
             grid.innerHTML += `
-                <div class="bg-white border border-gray-200 p-4 rounded shadow-sm">
+                <div class="bg-white border p-4 rounded shadow-sm">
                     <h2 class="font-bold text-sm uppercase text-gray-700 mb-4 border-b pb-2">${sec}</h2>
-                    <div id="content-${sectionId}" class="min-h-[100px] mb-4 space-y-2"></div>
-                    <button onclick="alert('Functionality coming soon: Add record to ${sec}')" class="w-full bg-[#FFDD00] text-black font-bold py-2 rounded text-xs hover:bg-yellow-400">
-                        + Add Record
-                    </button>
+                    <div id="content-${sec.replace(/ /g, '-')}" class="min-h-[100px]"></div>
                 </div>
             `;
         });
 
-        // Load data from Supabase
-        async function loadData() {
-            const { data, error } = await supabase.from('canvas_entries').select('*');
-            if (error) {
-                console.error("Error loading data:", error);
-                return;
-            }
-            data.forEach(entry => {
-                const sectionDiv = document.getElementById(`content-${entry.section.replace(/ /g, '-')}`);
-                if (sectionDiv) {
-                    sectionDiv.innerHTML += `<div class="p-2 bg-gray-50 border rounded text-xs">${entry.content}</div>`;
-                }
-            });
-        }
-
-        loadData();
+        console.log("Grid rendered. Now attempting Supabase connection...");
     </script>
+</body>
+</html>
