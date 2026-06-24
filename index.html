@@ -3,27 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body class="bg-[#F8F9FA] p-8">
-    <h1 class="text-2xl font-bold mb-8">usBIM Strategy Canvas | EN TEAM</h1>
+    <header class="mb-8 border-b-2 border-[#FFDD00] pb-4">
+        <h1 class="text-2xl font-bold text-gray-900">usBIM Strategy Canvas | EN TEAM</h1>
+    </header>
+
     <div id="canvas-grid" class="grid grid-cols-3 gap-6"></div>
 
     <script>
-        // Draw the grid first, then try to connect to the DB
         const sections = ["Key Partners", "Key Activities", "Key Resources", "Value Proposition", "Client Relationship", "Communication Channels", "Client Segments", "Structural Costs", "Revenue Streams"];
-        const grid = document.getElementById('canvas-grid');
         
+        const grid = document.getElementById('canvas-grid');
         sections.forEach(sec => {
             grid.innerHTML += `
                 <div class="bg-white border p-4 rounded shadow-sm">
                     <h2 class="font-bold text-sm uppercase text-gray-700 mb-4 border-b pb-2">${sec}</h2>
-                    <div id="content-${sec.replace(/ /g, '-')}" class="min-h-[100px]"></div>
+                    <div id="content-${sec.replace(/ /g, '-')}" class="min-h-[100px] mb-2 text-xs"></div>
+                    <button onclick="addEntry('${sec}')" class="w-full bg-[#FFDD00] text-black font-bold py-2 rounded text-xs hover:bg-yellow-400">+ Add Record</button>
                 </div>
             `;
         });
 
-        console.log("Grid rendered. Now attempting Supabase connection...");
+        async function loadData() {
+            const res = await fetch('/api/canvas');
+            const data = await res.json();
+            data.forEach(entry => {
+                const div = document.getElementById(`content-${entry.section.replace(/ /g, '-')}`);
+                if (div) div.innerHTML += `<div class="p-2 mb-2 bg-gray-50 border rounded text-xs">${entry.content}</div>`;
+            });
+        }
+
+        async function addEntry(section) {
+            const content = prompt(`Add record to ${section}:`);
+            if (!content) return;
+            await fetch('/api/canvas', {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify({ section, content })
+            });
+            location.reload();
+        }
+
+        loadData();
     </script>
 </body>
 </html>
