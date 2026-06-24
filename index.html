@@ -38,20 +38,47 @@
     </div>
 
     <script>
-        const sections = [
-            { name: "Partner Chiave", help: "Identifica alleanze strategiche, partner BIM-GIS e fornitori chiave per il mercato EN." },
-            { name: "Attività Chiave", help: "Definisci le attività critiche: R&D, localizzazione, supporto tecnico." },
-            { name: "Proposte di Valore", help: "Perché usBIM? Enfatizza l'interoperabilità, il CDE e i vantaggi competitivi." },
-            { name: "Relazioni con i Clienti", help: "Strategie di retention, supporto dedicato e community management." },
-            { name: "Segmenti di Clientela", help: "Target specifici: Pubblica Amministrazione, General Contractor, Studi di Progettazione." },
-            { name: "Risorse Chiave", help: "Risorse tecnologiche, umane e infrastrutture cloud proprietarie." },
-            { name: "Canali", help: "Come raggiungiamo il cliente? Marketplace, webinar, vendita diretta." },
-            { name: "Struttura dei Costi", help: "Analisi dei costi operativi, cloud hosting, spese di marketing." },
-            { name: "Flussi di Ricavi", help: "Modelli di monetizzazione: SaaS, licenze Enterprise, servizi professionali." }
-        ];
+    const sections = [
+        { name: "Partner Chiave", help: "Identifica alleanze strategiche, partner BIM-GIS e fornitori chiave per il mercato EN." },
+        { name: "Attività Chiave", help: "Definisci le attività critiche: R&D, localizzazione, supporto tecnico." },
+        { name: "Proposte di Valore", help: "Perché usBIM? Enfatizza l'interoperabilità, il CDE e i vantaggi competitivi." },
+        { name: "Relazioni con i Clienti", help: "Strategie di retention, supporto dedicato e community management." },
+        { name: "Segmenti di Clientela", help: "Target specifici: Pubblica Amministrazione, General Contractor, Studi di Progettazione." },
+        { name: "Risorse Chiave", help: "Risorse tecnologiche, umane e infrastrutture cloud proprietarie." },
+        { name: "Canali", help: "Come raggiungiamo il cliente? Marketplace, webinar, vendita diretta." },
+        { name: "Struttura dei Costi", help: "Analisi dei costi operativi, cloud hosting, spese di marketing." },
+        { name: "Flussi di Ricavi", help: "Modelli di monetizzazione: SaaS, licenze Enterprise, servizi professionali." }
+    ];
 
-        // Logic for grid and CRUD
-        // [See updated fetch logic below to support delete/edit]
-    </script>
+    function renderGrid() {
+        const grid = document.getElementById('canvas-grid');
+        grid.innerHTML = ''; // Clear first
+        sections.forEach(sec => {
+            const safeName = sec.name.replace(/ /g, '-');
+            grid.innerHTML += `
+                <div class="canvas-card p-5 rounded-2xl flex flex-col">
+                    <h2 class="text-[10px] uppercase font-bold text-slate-400 mb-4">${sec.name}</h2>
+                    <div id="content-${safeName}" class="flex-grow overflow-y-auto space-y-2 text-sm text-white"></div>
+                    <button onclick="openModal('${sec.name}')" class="w-full py-2 bg-slate-700 hover:bg-slate-600 rounded text-[10px] font-bold">+ AGGIUNGI</button>
+                </div>
+            `;
+        });
+    }
+
+    async function loadData() {
+        try {
+            const res = await fetch('/api/canvas');
+            const data = await res.json();
+            data.forEach(entry => {
+                const el = document.getElementById(`content-${entry.section.replace(/ /g, '-')}`);
+                if (el) el.innerHTML += `<div class="entry-card p-2 rounded mb-2 border-l-2 border-[#FFDD00]">${entry.content}</div>`;
+            });
+        } catch (e) { console.error("Database load error:", e); }
+    }
+
+    // Initialize
+    renderGrid();
+    loadData();
+</script>
 </body>
 </html>
