@@ -40,7 +40,6 @@
         </div>
     </div>
 
-    <!-- Modal -->
     <div id="modal" class="hidden fixed inset-0 bg-black/90 flex items-center justify-center p-4 z-50">
         <div class="bg-[#0f172a] p-8 rounded-2xl w-full max-w-xl border border-slate-700">
             <h2 id="modal-title" class="text-xl font-bold mb-4 acca-yellow"></h2>
@@ -69,6 +68,22 @@
     <script>
         let currentEditId = null;
 
+        function initCanvas() {
+            document.querySelectorAll('.bmc-box').forEach(box => {
+                const sec = box.getAttribute('data-section');
+                const iconName = box.getAttribute('data-icon');
+                box.innerHTML = `
+                    <div class="flex items-center gap-2 mb-2">
+                        <i data-lucide="${iconName}" class="w-4 h-4 text-[#FFDD00]"></i>
+                        <h2 class="text-xs uppercase font-semibold text-slate-300 tracking-wider">${sec}</h2>
+                    </div>
+                    <div id="content-${sec.replace(/ /g, '-')}" class="flex-grow"></div>
+                    <button onclick="openModal('${sec}')" class="mt-4 text-[9px] bg-slate-800 py-1 rounded hover:bg-slate-700">+ AGGIUNGI</button>`;
+            });
+            lucide.createIcons();
+            loadData();
+        }
+
         function showDeleteConfirm(id) {
             const card = document.getElementById(`card-${id}`);
             const div = document.createElement('div');
@@ -81,24 +96,31 @@
             card.appendChild(div);
         }
 
-        // ... (Existing functions for loadData, openModal, saveEntry, deleteEntry remain same)
         async function loadData() {
-            const res = await fetch('/api/canvas');
-            const data = await res.json();
-            document.querySelectorAll('[id^="content-"]').forEach(s => s.innerHTML = '');
-            data.forEach(entry => {
-                const container = document.getElementById(`content-${entry.section.replace(/ /g, '-')}`);
-                if (container) {
-                    container.innerHTML += `
-                        <div id="card-${entry.id}" class="entry-card" style="background-color: ${entry.color || '#1e293b'} !important;">
-                            ${entry.content}
-                            <div class="flex gap-2 mt-2 justify-end">
-                                <button onclick="editEntry(${entry.id}, '${entry.content.replace(/'/g, "\\'")}', '${entry.section}', '${entry.color}')" class="text-blue-400 text-[10px]">✎ Edit</button>
-                                <button onclick="showDeleteConfirm(${entry.id})" class="text-red-400 text-[10px]">✕ Delete</button>
-                            </div>
-                        </div>`;
-                }
-            });
+            try {
+                const res = await fetch('/api/canvas');
+                const data = await res.json();
+                document.querySelectorAll('[id^="content-"]').forEach(s => s.innerHTML = '');
+                data.forEach(entry => {
+                    const container = document.getElementById(`content-${entry.section.replace(/ /g, '-')}`);
+                    if (container) {
+                        container.innerHTML += `
+                            <div id="card-${entry.id}" class="entry-card" style="background-color: ${entry.color || '#1e293b'} !important;">
+                                ${entry.content}
+                                <div class="flex gap-2 mt-2 justify-end">
+                                    <button onclick="editEntry(${entry.id}, '${entry.content.replace(/'/g, "\\'")}', '${entry.section}', '${entry.color}')" class="text-blue-400 text-[10px]">✎ Edit</button>
+                                    <button onclick="showDeleteConfirm(${entry.id})" class="text-red-400 text-[10px]">✕ Delete</button>
+                                </div>
+                            </div>`;
+                    }
+                });
+            } catch (e) { console.error("Error loading data"); }
+        }
+
+        function selectColor(color) {
+            document.getElementById('selected-color').value = color;
+            document.querySelectorAll('.color-btn').forEach(b => b.style.outline = 'none');
+            event.target.style.outline = '2px solid #FFDD00';
         }
 
         function openModal(sec, id = null, content = '', color = '#1e293b') {
@@ -127,7 +149,8 @@
 
         function editEntry(id, content, section, color) { openModal(section, id, content, color); }
         document.getElementById('save-btn').onclick = saveEntry;
-        loadData();
+        
+        window.onload = initCanvas;
     </script>
 </body>
 </html>
