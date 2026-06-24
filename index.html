@@ -5,7 +5,14 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
-        body { background-color: #050a14; color: #FFFFFF; font-family: 'Inter', sans-serif; }
+        body { 
+            background-color: #050a14; 
+            /* Added Sketched Data Background Effect */
+            background-image: url("data:image/svg+xml,%3Csvg width='200' height='200' viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='%23FFDD00' fill-opacity='0.15'%3E%3Ccircle cx='20' cy='20' r='2'/%3E%3Ccircle cx='100' cy='50' r='2'/%3E%3Ccircle cx='180' cy='180' r='2'/%3E%3Ccircle cx='50' cy='150' r='2'/%3E%3Cpath d='M20 20L100 50L180 180L50 150L20 20Z' stroke='%23FFDD00' stroke-width='0.5' stroke-opacity='0.2' fill='none'/%3E%3C/g%3E%3C/svg%3E");
+            background-repeat: repeat;
+            color: #FFFFFF; 
+            font-family: 'Inter', sans-serif; 
+        }
         .viewport { height: 100vh; overflow-y: auto; padding-bottom: 50px; }
         .viewport::-webkit-scrollbar { width: 8px; }
         .viewport::-webkit-scrollbar-thumb { background: rgba(255, 221, 0, 0.2); border-radius: 10px; }
@@ -22,7 +29,7 @@
 </head>
 <body class="p-0 m-0">
     <div class="viewport">
-        <header class="p-8 border-b border-slate-800 mb-6">
+        <header class="p-8 border-b border-slate-800 mb-6 bg-[#050a14]/80 backdrop-blur-sm">
             <h1 class="text-3xl font-extrabold">ACCA <span class="acca-yellow">BIM Strategy Canvas</span></h1>
             <p class="text-slate-400 text-sm">EN-TEAM | Global Market Intelligence Portal</p>
         </header>
@@ -66,6 +73,7 @@
     </div>
 
     <script>
+        // JS functionality remains unchanged to ensure data persistence
         let currentEditId = null;
 
         function initCanvas() {
